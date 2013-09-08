@@ -1,0 +1,134 @@
+<script src="./js/MIDI/AudioDetect.js" type="text/javascript"></script>
+ <script src="./js/MIDI/LoadPlugin.js" type="text/javascript"></script>
+ <script src="./js/MIDI/Plugin.js" type="text/javascript"></script>
+ <script src="./js/MIDI/Player.js" type="text/javascript"></script>
+ <script src="./js/Window/DOMLoader.XMLHttp.js" type="text/javascript"></script>
+ <script src="./js/Window/DOMLoader.script.js" type="text/javascript"></script>
+ <!-- extras -->
+ <script src="./inc/Base64.js" type="text/javascript"></script>
+ <script src="./inc/base64binary.js" type="text/javascript"></script>
+ <script src="/js/jQuery/jquery.min.js"></script>
+
+<script type="text/javascript">
+ 
+  var socket = io.connect('http://localhost:8000/');
+  console.log(socket);
+  var packetArray = new Array();
+
+  socket.on('connect', function(data){
+   setStatus('connected');
+   // socket.emit('subscribe', {channel:'realtime'});
+  });
+ 
+socket.on('message', function (data) {
+  console.log("Hello, i got data: " + data); 
+}); 
+
+</script> 
+
+
+
+velocity
+<button onclick="velocity(true)">++</button>
+
+<button onclick="velocity(false)">--</button>
+</br>
+</br>
+</br>
+
+orientation
+<button onclick="orientation(true)">++</button>
+<button onclick="orientation(false)">--</button>
+
+</br>
+</br>
+</br>
+
+<button onclick="stop()"> PANIC!!!! </button>
+
+
+<script>
+
+var _velocity = 127;
+var _orientation = 21; 
+function velocity(value) {
+
+	if(value) {
+		_velocity ++;
+	}
+	else if(_velocity >0) {
+		_velocity --;
+	}
+		;
+
+	processMidi();
+};
+
+function orientation(value) {
+
+	if(value) {
+		_orientation ++;
+	}
+	else if(_orientation >0) {
+		_orientation --;
+	}
+		;
+		
+	processMidi();
+};
+
+function processMidi() {
+
+	console.log("velocity =" + _velocity + " orientation =" + _orientation)
+
+	// for (var n = 50; n < 60; n ++) {
+			var delay = 1/2; // play one note every quarter second
+			// var note = MIDI.pianoKeyOffset + n; // the MIDI note
+			// var velocity = 127; // how hard the note hits
+			// // play the note
+			MIDI.noteOn(0, _orientation, _velocity, delay);
+			// play the some note 3-steps up
+			MIDI.noteOn(1, _orientation, _velocity, delay);
+
+			MIDI.noteOn(2, _orientation, _velocity, delay);
+			// MIDI.noteOn(0, _orientation+1, _velocity, delay);
+			console.log(MIDI.pianoKeyOffset);
+	// }
+};
+
+function stop() {
+
+	MIDI.stopAllNotes;
+
+};
+
+var _ready = false;
+
+window.onload = function () {
+	MIDI.loadPlugin({
+		soundfontUrl: "./soundfont/",
+		instruments: [ "acoustic_grand_piano", "synth_drum", "25 Acoustic Guitar (nylon)" ],
+		callback: function() {
+			MIDI.programChange(0, 0);
+			MIDI.programChange(1, 118);
+			MIDI.programChange(2, 118);
+			// for (var n = 0; n < 100; n ++) {
+			// 	var delay = n / 4; // play one note every quarter second
+			// 	var note = MIDI.pianoKeyOffset + n; // the MIDI note
+			// 	var velocity = 127; // how hard the note hits
+			// 	// play the note
+			// 	MIDI.noteOn(0, note, velocity, delay);
+			// 	// play the some note 3-steps up
+			// 	MIDI.noteOn(1, note + 3, velocity, delay);
+			_ready = true;
+		}
+	});
+};
+
+
+
+
+</script>
+
+
+
