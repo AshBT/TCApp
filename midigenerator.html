@@ -7,11 +7,13 @@
  <!-- extras -->
  <script src="./inc/Base64.js" type="text/javascript"></script>
  <script src="./inc/base64binary.js" type="text/javascript"></script>
- <script src="/js/jQuery/jquery.min.js"></script>
+ <script src="./js/jQuery/jquery.min.js"></script>
+
+<script type="text/javascript" src="http://localhost:9000/socket.io/socket.io.js"></script>
 
 <script type="text/javascript">
  
-  var socket = io.connect('http://localhost:8000/');
+  var socket = io.connect('http://localhost:9000/');
   console.log(socket);
   var packetArray = new Array();
 
@@ -20,11 +22,109 @@
    // socket.emit('subscribe', {channel:'realtime'});
   });
  
-socket.on('message', function (data) {
-  console.log("Hello, i got data: " + data); 
-}); 
+      // socket.on('reconnecting', function(data){
+      //   setStatus('reconnecting');
+      // });
+      
+      var topAccel = 0; 
 
-</script> 
+      socket.on('message', function (data) {
+         
+         if (data == "Streaming") { 
+            setDeviceStatusMessage("Kiwi ON");
+         }
+        
+        if (data == "Shake") { 
+            setInstructionMessage("Get in the Ring! Punch when you see the Glove.  ");
+            $('#scoreboard').fadeOut(300);
+            $('#glove').fadeOut(300);
+            $('#knob').fadeOut(300);
+            topAccel = 0; 
+            //setDial(topAccel);
+            // play music --> Knock Out Intro 
+           }
+
+
+        if (data == "StartPunching") {
+            setInstructionMessage("Punch Now");
+            $('#knob').fadeIn(300);
+            $('#glove').fadeIn(300);
+
+            // play music --> Punching Sounds
+        }
+
+        packetArray = data.split(',');
+        
+        if (packetArray[0] == "Accel") {
+          topAccel = parseFloat(packetArray[1]).toFixed(3); 
+          $(".gauge").justgage(topAccel);
+          val(data);
+          //setDial(packetArray[1]);          
+        }
+
+        if (packetArray[0] == "MaxAccel") {
+          topAccel = parseFloat(packetArray[1]).toFixed(3); 
+          $('#user_score').val(topAccel);
+          //setInterval(function() { 
+          $('#glove').fadeOut(3000)
+          $('#dial').fadeOut(3000)
+          //   },3000);
+          
+          $('#leaderboard').fadeIn(300); 
+          setInstructionMessage("Shake to Play");
+         } 
+         // if (data == "playSound") {
+         //    playSound('punch');
+         // }
+         
+       }); 
+ 
+      function setDeviceStatusMessage(data) {
+          $('#device_streaming').html(data);
+      }
+
+      function setInstructionMessage(data) {
+          $('#instruction').html(data);
+      }
+      
+      function setPunchStreamStatusMessage(data) {
+          $('#punch_stream_on').html(data);
+      }
+
+      function setTopScoreMessage(data) {
+          $('#max_acceleration').html(data);
+      }
+  
+      function setStatus(msg) {
+          console.log('Connection Status : ' + msg);
+      }
+ 
+      function setDial(data) {
+          $(".dial").val(data);
+          $(".dial").trigger('change');
+      }
+
+
+      // function playSound(sound) {
+      //   if (window.HTMLAudioElement) {
+      //     var snd = new Audio('');
+       
+      //     // if(snd.canPlayType('audio/ogg')) {
+      //     //    snd = new Audio('sounds/' + sound + '.ogg');
+      //     // }
+          
+      //     if(snd.canPlayType('audio/mp3')) {
+      //       snd = new Audio(sound + '.mp3');
+      //     }
+       
+      //     snd.play();
+      //   }
+      //   else {
+      //     alert('HTML5 Audio is not supported by your browser!');
+      //   }
+      // }
+ 
+    </script>
 
 
 
